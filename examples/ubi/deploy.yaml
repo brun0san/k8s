@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: standalone-ephemeral-ime
+  labels:
+    app: csg-ime
+    env: test
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: fleet-test
+  name: fleet-test
+  namespace: default
+spec:
+  containers:
+  - command:
+    - bash
+    image: registry.access.redhat.com/ubi8:latest
+    imagePullPolicy: Always
+    name: fleet-test
+    stdin: true
+    tty: true
+  dnsPolicy: ClusterFirst
