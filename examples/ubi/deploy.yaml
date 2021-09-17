@@ -13,7 +13,7 @@ metadata:
   labels:
     run: fleet-test
   name: fleet-test
-  namespace: default
+  namespace: fleet-test
 spec:
   containers:
   - command:
