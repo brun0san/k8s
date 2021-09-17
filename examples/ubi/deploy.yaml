@@ -24,7 +24,7 @@ spec:
     port: 8999
     protocol: TCP
     targetPort: web
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -43,7 +43,7 @@ spec:
           service:
             name: web
             port:
-              name: web
+              number: 8999
         path: /
         pathType: Prefix
 ---
