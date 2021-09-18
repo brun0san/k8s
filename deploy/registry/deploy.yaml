@@ -12,7 +12,9 @@ metadata:
   name: registry
   namespace: registry-system
   labels:
-    app: registry
+    app.kubernetes.io/name: registry
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: registry
 spec:
   selector:
     app: registry
