@@ -1,0 +1,109 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: transmission
+  namespace: transmission
+spec:
+  serviceName: transmission
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transmission
+  template:
+    metadata:
+      labels:
+        app: transmission
+    spec:
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir:
+          medium: Memory
+        name: config-vol
+      - configMap:
+          defaultMode: 420
+          name: settings
+        name: settings-vol
+      initContainers:
+      - name: init
+        image: harbor.example.com/transmission/transmission:3.00-1
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - -c
+        - mkdir -p /var/lib/transmission/.config/transmission-daemon && ln -s /config/settings.json
+          /var/lib/transmission/.config/transmission-daemon/settings.json
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsUser: 10000
+        resources:
+          requests:
+            cpu: 5m
+            memory: 50Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/lib/transmission
+          name: config-vol
+        - mountPath: /config
+          name: settings-vol
+      containers:
+      - name: transmission-daemon
+        image: harbor.example.com/transmission/transmission:3.00-1
+        imagePullPolicy: IfNotPresent
+        command:
+        - transmission-daemon
+        - -f
+        - --log-debug
+        - -g
+        - /var/lib/transmission/.config/transmission-daemon
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsUser: 10000
+        ports:
+        - containerPort: 9091
+          name: web
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 5m
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/lib/transmission
+          name: config-vol
+        - mountPath: /config
+          name: settings-vol
+        startupProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 9091
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 9091
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
