@@ -22,4 +22,4 @@ spec:
   tls:
   - hosts:
     - transmission.example.com
-  secretName: transmission-ingress-cert
+    secretName: transmission-ingress-cert
