@@ -4,7 +4,6 @@ kind: Ingress
 metadata:
   annotations:
     #nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    cert-manager.io/cluster-issuer: ca-issuer
   name: transmission-ingress
   namespace: transmission
 spec:
@@ -19,7 +18,3 @@ spec:
               name: web
         path: /
         pathType: Prefix
-  tls:
-  - hosts:
-    - transmission.example.com
-    secretName: transmission-ingress-cert
