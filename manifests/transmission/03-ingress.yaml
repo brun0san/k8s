@@ -8,7 +8,7 @@ metadata:
   namespace: transmission
 spec:
   rules:
-  - host: transmission.example.com
+  - host: transmission.localdomain
     http:
       paths:
       - backend:
