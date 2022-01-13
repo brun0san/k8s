@@ -51,7 +51,7 @@ data:
       "rpc-authentication-required": false,
       "rpc-bind-address": "0.0.0.0",
       "rpc-enabled": true,
-      "rpc-host-whitelist": "transmission.localdomain",
+      "rpc-host-whitelist": "transmission.brazuca.cloud",
       "rpc-host-whitelist-enabled": true,
       "rpc-password": "{2ca7a4c83eb1960d62ebd23ce2dde8b6e8f1e25dBSGoZx6O",
       "rpc-port": 9091,
