@@ -11,8 +11,8 @@ metadata:
     cert-manager.io/issuer: origin-issuer
     cert-manager.io/issuer-kind: OriginIssuer
     cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
-    cert-manager.io/duration: 2h
-    cert-manager.io/renew-before: 1h
+    cert-manager.io/duration: 168h
+    cert-manager.io/renew-before: 24h
   name: transmission-ingress
   namespace: transmission
 spec:
