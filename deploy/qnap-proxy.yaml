@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qnap
+  namespace: test
+spec:
+  type: ClusterIP
+  ports:
+  - name: https-web
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: qnap
+  namespace: test
+subsets:
+- addresses:
+  - ip: 192.168.5.20
+  ports:
+  - name: https-web
+    port: 8443
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/hostname: nas.brazuca.cloud
+    external-dns.alpha.kubernetes.io/target: brazuca.cloud
+    cert-manager.io/issuer: origin-issuer
+    cert-manager.io/issuer-kind: OriginIssuer
+    cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
+    cert-manager.io/duration: 168h
+    cert-manager.io/renew-before: 24h
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ( $http_user_agent !~* "(Qmanager)" ) {
+        return 403;
+      }
+  name: nas-ingress
+  namespace: test
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: nas.brazuca.cloud
+    http:
+      paths:
+      - backend:
+          service:
+            name: qnap
+            port:
+              name: https-web
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - nas.brazuca.cloud
+    secretName: nas.brazuca.cloud-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/hostname: photos.brazuca.cloud
+    external-dns.alpha.kubernetes.io/target: brazuca.cloud
+    cert-manager.io/issuer: origin-issuer
+    cert-manager.io/issuer-kind: OriginIssuer
+    cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
+    cert-manager.io/duration: 168h
+    cert-manager.io/renew-before: 24h
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ( $http_user_agent !~* "(Qphoto|AppleCoreMedia|VLC)" ) {
+        return 403;
+      }
+  name: photos-ingress
+  namespace: test
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: photos.brazuca.cloud
+    http:
+      paths:
+      - backend:
+          service:
+            name: qnap
+            port:
+              name: https-web
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - photos.brazuca.cloud
+    secretName: photos.brazuca.cloud-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/hostname: files.brazuca.cloud
+    external-dns.alpha.kubernetes.io/target: brazuca.cloud
+    cert-manager.io/issuer: origin-issuer
+    cert-manager.io/issuer-kind: OriginIssuer
+    cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
+    cert-manager.io/duration: 168h
+    cert-manager.io/renew-before: 24h
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/server-snippet: |
+      set $deny_request 1;
+      if ( $http_user_agent ~ "(Qfile|AppleCoreMedia|VLC) {
+        set $deny_request 0;
+      }
+      if ( $request_uri ~ "(share.cgi\?ssid)" ) {
+        set $deny_request 0;
+      }
+      if ( $uri ~ "(share.cgi\?ssid)" ) {
+        set $deny_request 0;
+      }
+      if ( $deny_request = 1 ) {
+        return 403;
+      }
+  name: files-ingress
+  namespace: test
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: files.brazuca.cloud
+    http:
+      paths:
+      - backend:
+          service:
+            name: qnap
+            port:
+              name: https-web
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - files.brazuca.cloud
+    secretName: files.brazuca.cloud-tls
